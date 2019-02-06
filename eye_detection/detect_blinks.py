@@ -9,6 +9,7 @@ import imutils
 import time
 import dlib
 import cv2
+import serial
 
 
 def eye_aspect_ratio(eye):
@@ -21,6 +22,21 @@ def eye_aspect_ratio(eye):
 
     return ear
 
+
+com_port = serial.Serial("COM3", 9600)
+"""
+com_port_settings = {
+    "baudrate": 9600,
+    "bytesize": 8,
+    "parity": "N",
+    "stopbits": 1
+}
+com_port.applySettingsDict(com_port_settings)
+"""
+time.sleep(2)
+data = "S\n".encode('utf-8')
+com_port.write(data)
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
                 help="path to facial landmark predictor")
@@ -28,7 +44,7 @@ ap.add_argument("-v", "--video", type=str, default="",
                 help="path to input video file")
 args = vars(ap.parse_args())
 
-EYE_AR_THRESH = 0.25
+EYE_AR_THRESH = 0.2
 EYE_AR_CONSEC_FRAMES = 3
 
 COUNTER = 0
@@ -90,6 +106,10 @@ while True:
         else:
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
                 TOTAL += 1
+                # data = bytes("Sleep")
+                print(">> blink")
+                data = "Sleep\n".encode('utf-8')
+                com_port.write(data)
 
             COUNTER = 0
 
@@ -104,5 +124,6 @@ while True:
     if key == ord("q"):
         break
 
+com_port.close()
 cv2.destroyAllWindows()
 vs.stop()
