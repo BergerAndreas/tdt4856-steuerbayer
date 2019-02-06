@@ -41,7 +41,12 @@ void loop()
 
   vibrate(200,100);
 
-  blink_leds();
+  //blink_leds();
+  digitalWrite(VIBRATOR, HIGH);
+  blink_simultaneously(100,50);
+  digitalWrite(VIBRATOR, LOW);
+
+  delay(500);
 }
 
 void play_sound(int sound)
@@ -81,4 +86,16 @@ void blink_leds()
   digitalWrite(LED3, HIGH);
   delay(100);
   digitalWrite(LED3, LOW);
+}
+
+void blink_simultaneously(int time_on, int time_off)
+{
+  for(int i=0;i<5;i++)
+  {
+    digitalWrite(LED1, HIGH);
+    delay(time_on);
+    digitalWrite(LED1, LOW);
+    delay(time_off);
+  }
+  
 }
