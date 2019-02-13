@@ -22,20 +22,10 @@ def eye_aspect_ratio(eye):
 
     return ear
 
-
+# Set up serial communication to communicate with arduino
 com_port = serial.Serial("COM3", 9600)
-"""
-com_port_settings = {
-    "baudrate": 9600,
-    "bytesize": 8,
-    "parity": "N",
-    "stopbits": 1
-}
-com_port.applySettingsDict(com_port_settings)
-"""
+# Delay to make sure no message is lost
 time.sleep(2)
-data = "S\n".encode('utf-8')
-com_port.write(data)
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
@@ -44,10 +34,14 @@ ap.add_argument("-v", "--video", type=str, default="",
                 help="path to input video file")
 args = vars(ap.parse_args())
 
+# Threshhold for what EAR values indicate open/closed eye
 EYE_AR_THRESH = 0.2
+# Number of frames eye is closed that counts as a blink
 EYE_AR_CONSEC_FRAMES = 3
 
+# Used to count how many frames eye has currently been closed
 COUNTER = 0
+# Total number of blinks so far
 TOTAL = 0
 
 print("[INFO] loading facial landmark predictor...")
@@ -76,43 +70,53 @@ while True:
     if fileStream and not vs.more():
         break
 
+    # Get frame from video stream
     frame = vs.read()
     frame = imutils.resize(frame, width=450)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+    # Find faces
     rects = detector(gray, 0)
 
+    # Iterate over faces in frame
     for rect in rects:
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
 
+        # Find eyes in face and compute EAR
         left_eye = shape[l_start:l_end]
         right_eye = shape[r_start:r_end]
 
         left_ear = eye_aspect_ratio(left_eye)
         right_ear = eye_aspect_ratio(right_eye)
 
+        # Average EAR over both eyes
         ear_mean = (left_ear + right_ear) / 2
 
+        # Draw eyes in frame
         left_eye_hull = cv2.convexHull(left_eye)
         right_eye_hull = cv2.convexHull(right_eye)
 
         cv2.drawContours(frame, [left_eye_hull], -1, (0, 255, 0), 1)
         cv2.drawContours(frame, [right_eye_hull], -1, (0, 255, 0), 1)
 
+        # Check if EAR below threshhold, i.e. if eyes are closed
         if ear_mean < EYE_AR_THRESH:
             COUNTER += 1
 
+        # When eyes no longer closed, check if they were closed long enough for a blink
         else:
+            # If blink, then send data over serial port to arduino
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
                 TOTAL += 1
-                # data = bytes("Sleep")
                 print(">> blink")
                 data = "Sleep\n".encode('utf-8')
                 com_port.write(data)
 
+            # Reset counter
             COUNTER = 0
 
+        # Display number of blinks and current EAR on frame
         cv2.putText(frame, "Blinks: {}".format(TOTAL), (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         cv2.putText(frame, "EAR: {:.2f}".format(ear_mean), (300, 30),
