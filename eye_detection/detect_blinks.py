@@ -22,10 +22,13 @@ def eye_aspect_ratio(eye):
 
     return ear
 
-# Set up serial communication to communicate with arduino
-com_port = serial.Serial("COM3", 9600)
-# Delay to make sure no message is lost
-time.sleep(2)
+try:
+    # Set up serial communication to communicate with arduino
+    com_port = serial.Serial("COM3", 9600)
+    # Delay to make sure no message is lost
+    time.sleep(2)
+except:
+    print("No device connected")
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
@@ -111,7 +114,7 @@ while True:
                 TOTAL += 1
                 print(">> blink")
                 data = "Sleep\n".encode('utf-8')
-                com_port.write(data)
+                if 'com_port' in locals(): com_port.write(data)
 
             # Reset counter
             COUNTER = 0
