@@ -42,6 +42,10 @@ EYE_AR_THRESH = 0.2
 # Number of frames eye is closed that counts as a blink
 EYE_AR_CONSEC_FRAMES = 3
 
+
+# Used to keep track of time during a blink
+CLOSE_START = 0
+CLOSE_DURATION = 0
 # Used to count how many frames eye has currently been closed
 COUNTER = 0
 # Total number of blinks so far
@@ -105,16 +109,24 @@ while True:
 
         # Check if EAR below threshhold, i.e. if eyes are closed
         if ear_mean < EYE_AR_THRESH:
+            if CLOSE_START == 0:
+                CLOSE_START = time.time()
             COUNTER += 1
 
         # When eyes no longer closed, check if they were closed long enough for a blink
         else:
             # If blink, then send data over serial port to arduino
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
+
+                CLOSE_DURATION = time.time()-CLOSE_START
+
                 TOTAL += 1
                 print(">> blink")
                 data = "Sleep\n".encode('utf-8')
                 if 'com_port' in locals(): com_port.write(data)
+
+            # Resest
+            CLOSE_START = 0
 
             # Reset counter
             COUNTER = 0
@@ -123,6 +135,8 @@ while True:
         cv2.putText(frame, "Blinks: {}".format(TOTAL), (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         cv2.putText(frame, "EAR: {:.2f}".format(ear_mean), (300, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+        cv2.putText(frame, "Blink duration: {:.2f}".format(CLOSE_DURATION), (10, 60),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     cv2.imshow("Frame", frame)
