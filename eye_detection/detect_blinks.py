@@ -116,12 +116,18 @@ while True:
 
         # When eyes no longer closed, check if they were closed long enough for a blink
         else:
-            CLOSE_DURATION = time.time()-CLOSE_START
+
+            TMP_CLOSE_DURATION = time.time()-CLOSE_START
+
+            if CLOSE_START:
+                CLOSE_DURATION = TMP_CLOSE_DURATION
+
             # If blink, then send data over serial port to arduino
             # if COUNTER >= EYE_AR_CONSEC_FRAMES:
-            if CLOSE_DURATION >= EYE_AR_TIME_THRESH:
+            if TMP_CLOSE_DURATION >= EYE_AR_TIME_THRESH and CLOSE_START != 0:
 
 
+                CLOSE_DURATION = time.time()-CLOSE_START
                 TOTAL += 1
                 print(">> blink")
                 data = "Sleep\n".encode('utf-8')
