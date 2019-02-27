@@ -24,29 +24,31 @@ void setup()
 
   // Initialize LED1-3
   pinMode(LED1, OUTPUT);
-  digitalWrite(LED1, HIGH);
+  //digitalWrite(LED1, HIGH);
   
   pinMode(LED2, OUTPUT);
   digitalWrite(LED2, HIGH);
   
   pinMode(LED3, OUTPUT);
-  digitalWrite(LED3, HIGH);
+  //digitalWrite(LED3, HIGH);
 }
 
 void loop()
 {
 
   /*sound bass 1~7*/
-  play_sound(7);
+  //play_sound(7);
 
-  vibrate(200,100);
+  //vibrate(200,100);
 
   //blink_leds();
-  digitalWrite(VIBRATOR, HIGH);
-  blink_simultaneously(100,50);
-  digitalWrite(VIBRATOR, LOW);
-
+  //digitalWrite(VIBRATOR, HIGH);
+  //blink_simultaneously(100,50);
+  //digitalWrite(VIBRATOR, LOW);
+  digitalWrite(LED2, HIGH);
   delay(500);
+  digitalWrite(LED2, LOW);
+  delay(200);
 }
 
 void play_sound(int sound)
