@@ -41,7 +41,8 @@ args = vars(ap.parse_args())
 EYE_AR_THRESH = 0.2
 # Number of frames eye is closed that counts as a blink
 EYE_AR_CONSEC_FRAMES = 3
-
+# Time of blink required to trigger alarm
+EYE_AR_TIME_THRESH = 0.2
 
 # Used to keep track of time during a blink
 CLOSE_START = 0
@@ -115,10 +116,11 @@ while True:
 
         # When eyes no longer closed, check if they were closed long enough for a blink
         else:
+            CLOSE_DURATION = time.time()-CLOSE_START
             # If blink, then send data over serial port to arduino
-            if COUNTER >= EYE_AR_CONSEC_FRAMES:
+            # if COUNTER >= EYE_AR_CONSEC_FRAMES:
+            if CLOSE_DURATION >= EYE_AR_TIME_THRESH:
 
-                CLOSE_DURATION = time.time()-CLOSE_START
 
                 TOTAL += 1
                 print(">> blink")
