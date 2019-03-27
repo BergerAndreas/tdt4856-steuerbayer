@@ -32,10 +32,13 @@ void loop()
   The sequenece will result in 6 blinks and 6 sound signals. The vibrator will vibrate in sync with the sound.
   */
   
-  
+  int trigger_signal = 0;
   // Send data only when you receive data
+  String inString = "";
   if (Serial.available() > 0) {
-    trigger_signal = Serial.read();
+    int inChar = Serial.read();
+    inString += (char)inChar;
+    trigger_signal = inString.toInt();
   }
 
   if (trigger_signal == 1) {

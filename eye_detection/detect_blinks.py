@@ -117,7 +117,7 @@ while True:
         # When eyes no longer closed, check if they were closed long enough for a blink
         else:
 
-            # Duration of blink
+            # Duration of blink, will be equal to time.time() if eye has been open
             TMP_CLOSE_DURATION = time.time()-CLOSE_START
 
             # If eye has opened, set CLOSE_DURATION
@@ -130,8 +130,10 @@ while True:
 
                 TOTAL += 1
                 print(">> blink")
-                data = "Sleep\n".encode('utf-8')
-                if 'com_port' in locals(): com_port.write(data)
+                data = "1\n".encode('utf-8')
+                if 'com_port' in locals():
+                    print("Sending")
+                    com_port.write(data)
 
             # Reset
             CLOSE_START = 0
